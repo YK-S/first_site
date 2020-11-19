@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 SECRET_KEY = 'a_8tfe)3-lc^9q_#e-ia(d1b=%-tdwyjidwhutu^*-#7*xc4vs'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['127.0.0.1']
 
@@ -127,3 +127,5 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'bootstrap'),
     os.path.join(BASE_DIR, 'JavaScript'),
 )
+# 静态文件收集目录
+STATIC_ROOT = os.path.join(BASE_DIR, 'collected_static')
