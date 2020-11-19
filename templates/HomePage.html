@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!--<link rel="stylesheet" href="/static/css/bootstrap.min.css"/>-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <!--<script src="/static/jquery-3.5.1.js"></script>-->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script><!--用于提供axios支持 支持ajax的js库-->
+    <title>Home</title>
+</head>
+<body>
+    <div class="container">
+        <nav id = "nav" class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" @click="home_vote">首页</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link"  @click="make_new">创建投票</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" @click="my_vote">我的投票</a>
+                </li>
+                 <li class="nav-item">
+                    <a class="nav-link disabled"  href="/vote/test/">TEST</a>
+                </li>
+                <li class="nav-item">
+                    <div class="input-group">
+                        <input type="search" class="form-control" placeholder="输入投票ID" aria-label="ID" aria-describedby="button-addon2" v-model="vote_id">
+                        <div class="input-group-append">
+                          <button class="btn btn-outline-secondary" type="button" id="button-addon2" @click="join(-1)">加入</button>
+                        </div>
+                    </div>
+
+                </li>
+            </ul>
+            <div class="nav-item dropdown" v-show = "show_user">
+                <a  class="nav-link dropdown-toggle" href='#' data-toggle="dropdown"  v-text="user_name"></a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" @click="logout">log out</a>
+                </div>
+            </div>
+            <svg  v-show="show_user" width="2.5em" height="2.5em" viewBox="0 0 16 16" class="bi bi-person-circle nav-item" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13.468 12.37C12.758 11.226 11.195 10 8 10s-4.757 1.225-5.468 2.37A6.987 6.987 0 0 0 8 15a6.987 6.987 0 0 0 5.468-2.63z"></path>
+            <path fill-rule="evenodd" d="M8 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path>
+            <path fill-rule="evenodd" d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path>
+            </svg>
+          
+        </nav>
+        <div class="row mt-3" id = "row2">
+            <div class="col-md-4">
+                <h3 v-text="Title"></h3>
+            </div>
+            <div class="col-md-3"></div>
+            <div class="col-md-4">
+                <div class="my-2 my-lg-0 input-group" v-show="search_show">
+                    <input class="form-control mr-sm-2" type="search" placeholder="输入投票标题" aria-label="Search" v-model="input_search">
+                    <button class="btn btn-outline-success my-2 my-sm-0" @click="search">搜 索</button>
+                </div>
+            </div>
+            
+        </div>
+        <div class="row" id="table">
+            <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th scope="col">投票ID</th>
+                    <th scope="col">标题</th>
+                    <th scope="col">建立时间</th>
+                    <th scope="col">建立用户</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="item in page_data">
+                        <th scope="row" v-text="item[0]"></th>
+                        <td><a href="#" @click="join(item[0])" v-text="item[1]"><a></td>
+                        <td v-text="item[2]"></td>
+                        <td v-text="item[3]"></td>
+                    </tr>
+                </tbody>
+              </table>
+              <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                  <li class="page-item"><button class="page-link" @click="page(1)">上一页</button></li>
+                  <li class="page-item"><button class="page-link" v-text="now_page" disabled></button></li>
+                  <li class="page-item"><button class="page-link" @click="page(2)">下一页</button></li>
+                </ul>
+              </nav>
+        </div>
+    </div>
+    
+
+  
+    <!-- Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel" v-text="modal_item"></h5>
+                    <button id = "modal_close" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="login" v-show="show_login">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon1">姓 名</span>
+                            </div>
+                            <input v-model = "name" type="text" class="form-control" placeholder="请输入您的姓名" aria-label="Username" aria-describedby="basic-addon1">
+                        </div>
+                        <div class="alert alert-danger" role="alert" v-show="show_name_alert">
+                            错误！ 姓名不可以为空哟！
+                        </div>
+                        <div class="alert alert-warning" role="alert" v-show="show_pwd_alert">
+                            警告！ 用户名密码不匹配！
+                          </div>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon1">密 码</span>
+                            </div>
+                            <input v-model = "pwd" type="password" class="form-control" placeholder="请输入您的密码" aria-label="Userpwd" aria-describedby="basic-addon1">
+                        </div>
+                    </div>
+                    <div class="container" v-show="show_vote">
+                        <div class="row border-bottom border-dark pb-2 mb-3">
+                                <form>
+                                    <div class="form-group">
+                                      <label for="FormControlInput1">标题</label>
+                                      <input type="text" class="form-control" id="FormControlInput1" placeholder="在此输入标题" v-model="title">
+                                    </div>
+                                    <div class="alert alert-danger" role="alert" v-if="show_vote_alert">
+                                        <strong>警告！</strong>标题和选项不得为空!
+                                    </div>
+                                    <div class="form-group">
+                                      <label for="exampleFormControlTextarea1">补充描述（选填）</label>
+                                      <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" placeholder="在此输入补充描述" v-model="details"></textarea>
+                                    </div>
+                                    
+                                    <div class="form-row align-items-center">
+                                        <div class="col-auto my-1">
+                                            <label class="mr-sm-2 sr-only" for="inlineFormCustomSelect1">Preference</label>
+                                            <select class="custom-select mr-sm-2" id="inlineFormCustomSelect1" v-model="vote_days">
+                                                <option value="1" selected>1天有效</option>
+                                                <option value="3">3天有效</option>
+                                                <option value="7">7天有效</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-auto my-1">
+                                            <label class="mr-sm-2 sr-only" for="inlineFormCustomSelect2">Preference</label>
+                                            <select class="custom-select mr-sm-2" id="inlineFormCustomSelect2" v-model="vote_type1">
+                                                <option value="0" selected>单选投票</option>
+                                                <option value="1">多选投票</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-auto my-1">
+                                            <label class="mr-sm-2 sr-only" for="inlineFormCustomSelect3">Preference</label>
+                                            <select class="custom-select mr-sm-2" id="inlineFormCustomSelect3" v-model="vote_type2">
+                                                <option value="0" selected>公开</option>
+                                                <option value="1">不公开</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                  </form>
+                        </div>
+                            
+                           
+                        <div class="row">
+                            <div class="row input-group mb-3">
+                                <input type="text" class="form-control" placeholder="选项" aria-label="items" aria-describedby="button-addon1" v-model="input_item">
+                                <div class="input-group-append">
+                                  <button class="btn btn-outline-secondary" type="button" id="button-addon1" @click="add_item">添加</button>
+                                </div>
+                              </div>
+                            <div class="alert alert-success alert-dismissible fade show"  v-for="(item,counter) in items" role="counter">
+                                <span v-text="item"></span>
+                                <button type="button" class="close" data-dismiss="counter" aria-label="Close" @click="close(counter)">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        </div>        
+                    </div>
+                    <!--显示投票-->
+                    <div class="container" v-show="show_the_vote">   
+                        <div class="form-group">
+                            <h4>标题:</h4>
+                            <p v-text="vote_name"></p>
+                            <h4>细节描述</h4>
+                            <p v-text="vote_details"></p>
+                            <h4>投票内容</h4>
+                            <label for="exampleFormControlSelect2" v-text = "show_type"></label>
+                            <select :multiple="multiple_select" class="form-control" id="exampleFormControlSelect2" v-model="select">
+                              <option v-for="(item,counter) in resp_items" v-text = "item" :value="counter"></option>
+                            </select>
+                          </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                <button  type="button" class="btn btn-primary" @click="click_func" v-text="confirm_btn"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+  
+  <!-- Modal -->
+  <div class="modal fade" id="my_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="ModalLabel">投票详情</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <h4>细节描述</h4>
+            <p v-text="details"></p>
+            <h4>投票内容</h4>
+           <div v-for="(item,counter) in items">
+               "<span v-text="item"></span>":<span v-text="polls[counter]"></span>票
+           </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    {%csrf_token%}
+    <script type="text/javascript">
+        var response_name="{{name}}";   //用于载入用户名
+        $(document).ready(function(){   //处理载入时的用户名问题
+            console.log('载入的用户名：' + response_name);
+            if(response_name == "None"){
+                nav.user_name = "未登录";
+            }
+            else{
+                nav.user_name = response_name;
+                nav.show_user = true;
+            }
+            nav.show_my_vote = false;
+            table.get_table();
+        });
+        class Vote{
+            constructor(vote_name, vote_type, limit_days, builder, vote_items, vote_details){
+                this.vote_name=vote_name;
+                this.vote_type=vote_type;
+                this.limit_days=limit_days;
+                this.builder = builder
+                this.vote_items = vote_items;
+                this.vote_details = vote_details;
+            }
+            get_value(){
+                var vote = {
+                    vote_name:this.vote_name,
+                    vote_type:this.vote_type,
+                    limit_days:this.limit_days,
+                    builder:this.builder,
+                    vote_items:this.vote_items,
+                    vote_details:this.vote_details,
+                }
+                return vote;
+            }
+        }
+        function modal_fresh(){
+            modal.title = null;
+            modal.details = null;
+            modal.vote_days = 1;
+            modal.vote_type1 = 0;
+            modal.vote_type1 = 0;
+            modal.items = [];
+        }
+        var modal = new Vue({   //模态框
+            el:"#loginModal",
+            data:{
+                pwd:"",
+                name:"",
+                show_login:false,
+                show_vote:false,
+                show_name_alert:false,
+                show_pwd_alert:false,
+                modal_item:"ITEM",
+                confirm_btn:"OK",
+                items:[],
+                input_item:"",
+                vote_days:1,
+                vote_type1:0,
+                vote_type2:0,
+                title:"",
+                details:null,
+                show_vote_alert:false,
+                show_the_vote:false,
+                resp_items:[],  //返回的投票项
+                show_type:"单项选择",    //显示类型
+                multiple_select : false, //选择方式
+                select:0,           //选择
+                select_id:-1,    
+                vote_name : "",
+                vote_details:"",
+
+            },
+            methods:{
+                click_func:function(){
+                    console.log("进入click_func");
+                    if(this.show_login == true){
+                        console.log("show_login is true");
+                        this.login();
+                    }
+                    else if(this.show_vote == true){
+                        console.log("show_vote is true");
+                        this.make_vote();
+                    } 
+                    else{
+                        console.log("show_the_vote is true");
+                        this.join_vote();
+                    }
+                },
+                login:function(){
+                    this.show_pwd_alert = false;
+                    if(this.name == ""){
+                        this.show_name_alert = true;
+                        return;
+                    }
+                    else{
+                        this.show_name_alert = false;
+                    }
+                    axios.post('/vote/login/', {
+                            name: this.name,
+                            pwd: this.pwd,
+                            csrfmiddlewaretoken:$('[name="csrfmiddlewaretoken"]').val(),
+                        })
+                        .then(function (response) {
+                            code = response.data.code;
+                            name = response.data.name;
+                            if(code == '1'){//成功登录
+                                $("#modal_close").click();  //关闭模态框
+                                response_name = name; 
+                                nav.user_name = name;
+                                nav.show_user = true;
+                            }
+                            else if(code == '2'){//注册成功
+                                $("#modal_close").click();  //关闭模态框
+                            }
+                            else if(code == '3'){//用户名或者密码错误
+                                modal.show_pwd_alert = true;
+                            }
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                },
+                make_vote:function(){   //创建新vote
+                    if(this.items.length==0 || this.title == ""){   //出现问题！
+                        this.show_vote_alert = true;
+                        return;
+                    }
+                    this.show_vote_alert = false;
+                    var type = Number(this.vote_type1)*2+Number(this.vote_type2);
+                    var days = Number(this.vote_days)
+                    var details = this.vote_details;
+                    if(this.details=="") details = null;
+                    var vote = new Vote(this.title,type,days,response_name,this.items,this.details);
+                    axios.post('/vote/make_vote/', {
+                            vote,
+                        })
+                        .then(function (response) {
+                            $("#modal_close").click();  //关闭模态框
+                            modal_fresh();//刷新模态框
+                            table.get_table();  //刷新表格
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                },
+                join_vote:function(){
+                    console.log("select: ", modal.select);
+                    if(modal.multiple_select == false){ //单选
+                        modal.select = [modal.select];
+                    }
+                    axios.post('/vote/select/',{
+                            s:modal.select ,
+                            id:modal.select_id,
+                        },
+                    ).then(function(response){
+                        var resp = response.data;
+                        console.log(resp);
+                    }).catch(function(error){
+                        console.log(error);
+                    });
+                    $("#modal_close").click();  //关闭模态框
+                },
+                add_item:function(){    //添加item
+                    if(this.input_item == "") return;
+                    this.items.push(this.input_item);
+                    this.input_item="";
+                },
+                close:function(counter){    //移除item
+                    this.items.splice(counter,1);
+                }   
+                
+            }
+
+        });
+
+        var row2 = new Vue({   //第二行 
+            el:"#row2",
+            data:{
+                Title:"正在进行的公开投票",
+                input_search:"",    //输入的搜索内容
+                search_show:true,
+            },
+            methods:{
+                search:function(){
+                    table.get_table();
+                },
+            }
+        });
+
+        var nav = new Vue({   //挂载导航栏
+            el:"#nav",  
+            data:{
+                user_name:"user_name",
+                show_user:false,
+                show_my_vote:false,
+                vote_id:"",
+                item_select : 0,   //单项选择的选择的item
+                items_select:[],    //多选的items
+            },
+            methods:{
+                logout:function(){  //登出
+                    axios.get('/vote/logout/')
+                        .then(function (response) {
+                            nav.user_name = '未登录';
+                            nav.show_user = false;
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                },
+                make_new:function(){    //创建新投票
+                    axios.get('/vote/check_login/')
+                        .then(function (response) {
+                            console.log('check_login:'+response.data);
+                            modal.show_name_alert = false;
+                            modal.show_pwd_alert = false;
+                            $('#loginModal').modal({"show":true});  //show modal
+                            if(response.data == true){  //这个人登录了
+                                modal.show_login = false;
+                                modal.show_the_vote = false;
+                                modal.show_vote = true;
+                                modal.modal_item = "创建新的投票";
+                                modal.confirm_btn="确认";
+                                nav.user_name = response_name;
+                            }
+                            else{   //他没有登录
+                                modal.show_vote= false;
+                                modal.show_the_vote = false;
+                                modal.show_login = true;
+                                modal.modal_item = "您必须先 登录/注册";
+                                modal.confirm_btn = "登录/注册"
+                            }
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+
+                },
+                my_vote:function(){
+                    axios.get('/vote/check_login/')
+                        .then(function (response) {
+                            console.log('check_login:'+response.data);
+                            modal.show_name_alert = false;
+                            modal.show_pwd_alert = false;
+                            if(response.data == true){  //这个人登录了
+                                nav.show_my_vote = true;
+                                row2.Title = "我发起的投票"
+                                table.get_table();
+                            }
+                            else{   //他没有登录
+                                $('#loginModal').modal({"show":true});  //show modal
+                                modal.show_vote= false;
+                                modal.show_the_vote = false;
+                                modal.show_login = true;
+                                modal.modal_item = "您必须先 登录/注册";
+                                modal.confirm_btn = "登录/注册"
+                            }
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                },
+                home_vote:function(){
+                    nav.show_my_vote = false;
+                    row2.Title = "正在进行的公开投票";
+                    table.get_table();
+                },
+                join:function(id=-1){    //尝试加入一个vote
+                    if(this.show_my_vote == true&&id!=-1){//打开自己的投票
+                        axios.get('/vote/get_my_vote/',{
+                            params:{
+                                id:id,
+                            },
+
+                        }).then(function(response){
+                            my_modal.items = response.data.items;
+                            my_modal.polls = response.data.polls;
+                            my_modal.details = response.data.details;
+                            if(my_modal.details == "")my_modal.details="无";
+                            $("#my_modal").modal({"show":true});  //show my_modal
+
+                        }).catch(function(error){
+                            console.log(error);
+                        });
+                        return;//溜了
+                    }
+                    if(id == -1)    
+                        var id = Number(this.vote_id);
+                    modal.select_id = id;
+                    axios.get('/vote/vote_exist/',{
+                    params:{
+                        id:id,
+                        }
+                    }
+                    ).then(function (response){
+                        ret = response.data.ret;   //data是包含很多行list的list
+                        if(ret == true){    //允许投票
+                            modal.show_login = false;
+                            modal.show_vote = false;
+                            modal.show_the_vote = true;//显示投票页面
+                            modal.modal_item = "投票";
+                            modal.confirm_btn = "就这样投";
+                            modal.vote_name = response.data.vote_name;
+                            modal.vote_details = response.data.details;
+                            modal.resp_items = response.data.items;
+                            if(modal.vote_details == "") modal.vote_details = "无";
+                            console.log("details:", modal.vote_details);
+                            var type = response.data.type;
+                            if (type == 2 || type ==3 ){
+                                modal.show_type = "多项选择" 
+                                modal.multiple_select = true;
+                                modal.select = nav.items_select;
+                            }
+                            else {
+                                modal.show_type = "单项选择";
+                                modal.multiple_select = false;
+                                modal.select = nav.item_select;
+                            }
+                                
+                            $('#loginModal').modal({"show":true});  //show modal
+                        }
+                        else{
+                            nav.vote_id="该ID不存在！"
+                        }
+                    })
+                    .catch(function(error){
+                        console.log(error);
+                    });
+                        
+                },
+            }
+            });
+
+        var table = new Vue({
+            el:'#table',
+            data:{
+                max_page:1,     //最大page
+                now_page:1,     //当前page
+                page_data:[],
+                
+            },
+            methods:{
+                get_table:function(){
+                    var name = ""
+                    var type13 = 0; //是否公开
+                    if(row2.input_search != "") this.now_page = 1;  //需要搜索则置1
+                    if(nav.show_my_vote == true) {
+                        name = response_name;
+                        type13 = 1;
+                    }
+                    console.log("type13: ",type13);
+                    axios.get('/vote/get_table/',{
+                        params:{
+                            page :this.now_page,
+                            search:row2.input_search,
+                            name:name,
+                            type13:type13,
+                            }
+                        }
+                    )
+                    .then(function (response){
+                        data = response.data.data;   //data是包含很多行list的list
+                        table.page_data = data;
+                        table.max_page = response.data.max_page;
+                    })
+                    .catch(function(error){
+                        console.log(error);
+                    });
+                },
+                page:function(p){   //翻页
+                    if(p == 1) p = this.now_page-1;
+                    else if(p == 2) p = this.now_page+1;
+                    if(p > this.max_page) return;
+                    if(p < 1) return;
+                    this.now_page = p;
+                    this.get_table();
+                },
+                join:function(id){
+                    console.log("id:",id);
+                    nav.join(id);
+                }
+            },
+        });
+
+        var my_modal = new Vue({
+            el:"#my_modal",
+            data:{
+                items:[],
+                polls:[],
+                details:"",
+            },
+        });
+     
+    </script>
+   
+</body>
+</html>

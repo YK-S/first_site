@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/static/jquery-3.5.1.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <title>jQtest</title>
+</head>
+<body>
+    <div id="test">    
+        <input type="button"  value="Submit" @click="submit">
+        <input type="text" v-model="text"  @focus="change">
+        <p v-text = "message" v-show="success_ajax"></p>
+    </div>
+    {%csrf_token%}
+    <script>
+        new Vue({
+            el:"#test",
+            data:{
+                message:" AJAX异步通信测试成功！",
+                text:"value",
+                success_ajax:false
+            },
+            methods:{
+                submit:function(){
+                    var s_flag = false;
+                    try{
+                        $.post({
+                            url:"/test/",
+                            data:{
+                                "uname":this.text,
+                                "csrfmiddlewaretoken":$('[name="csrfmiddlewaretoken"]').val(),
+                            },
+                        });
+                        this.success_ajax = true;
+                    }
+                    catch{
+                        console.log("AJAX通信错误")
+                    }
+                },
+                change:function(){
+                    if(this.success_ajax == true){
+                        this.success_ajax = false;
+                    }
+
+                },
+                
+            }
+        });
+    </script>
+</body>
+</html>
