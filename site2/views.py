@@ -10,3 +10,8 @@ def test(request):
         print(name)
         response = JsonResponse({'ret':name})
     return response
+
+
+def default(request):
+    responce = render(request, 'default.html')
+    return responce
