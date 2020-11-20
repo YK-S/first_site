@@ -6,4 +6,4 @@ you need write these lines with CMD
 python3 manage.py migrate
 python3 manage.py collectstatic
 
-[Tip] admin name root admin psw:123456
+[Tip] Now you can type python3 manage.py createsuperuser to start admin application
