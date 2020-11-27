@@ -448,11 +448,12 @@
                 make_new:function(){    //创建新投票
                     axios.get('/vote/check_login/')
                         .then(function (response) {
-                            console.log('check_login:'+response.data);
+                            var login = response.data.ret;
+                            console.log('check_login:'+login);
                             modal.show_name_alert = false;
                             modal.show_pwd_alert = false;
                             $('#loginModal').modal({"show":true});  //show modal
-                            if(response.data == true){  //这个人登录了
+                            if(login == true){  //这个人登录了
                                 modal.show_login = false;
                                 modal.show_the_vote = false;
                                 modal.show_vote = true;
@@ -476,10 +477,11 @@
                 my_vote:function(){
                     axios.get('/vote/check_login/')
                         .then(function (response) {
-                            console.log('check_login:'+response.data);
+                            var login = response.data.ret;
+                            console.log('check_login:'+login);
                             modal.show_name_alert = false;
                             modal.show_pwd_alert = false;
-                            if(response.data == true){  //这个人登录了
+                            if(login == true){  //这个人登录了
                                 nav.show_my_vote = true;
                                 row2.Title = "我发起的投票"
                                 table.get_table();
