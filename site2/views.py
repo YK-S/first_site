@@ -14,10 +14,13 @@ def test(request):
 
 
 def default(request):
+    error = ""
     if request.method == "POST":
         pwd = request.POST.get("pwd")
         if pwd == "0603":
             request.session['permission'] = 'True'
             return redirect("/vote/")
-    responce = render(request, 'default.html')
+        else:
+            error = "ERROR"
+    responce = render(request, 'default.html', context={"error": error})
     return responce
