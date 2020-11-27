@@ -1,12 +1,16 @@
-
+from django.contrib.auth.decorators import login_required
 import pytz
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 from .models import *
 import json
-import datetime 
+import datetime
+from site2.views import default
 # Create your views here.
+
 def vote(request):
+    if check_permission(request) is False:
+        return redirect(default)
     name = request.session.get("user_name")
     utc_tz = pytz.timezone('UTC')
     now_time = datetime.datetime.now(tz=utc_tz)
@@ -42,13 +46,12 @@ def login(request):
     return response
 
 
-def check_login(request):      # 检查登录状态 返回true false
-    name = request.session.get("user_name")
+def check_permission(request):      # 检查permission 返回true false
+    name = request.session.get("permission")
     if name is None:
-        response = HttpResponse("false")
+        return False
     else:
-        response = HttpResponse("true")
-    return response
+        return True
 
 
 def logout(request):    # 登出
@@ -183,4 +186,13 @@ def get_my_vote(request):
         items.append(item.content)
         polls.append(item.poll)
     response = JsonResponse({"items": items, "polls":polls,"details":details})
+    return response
+
+
+def check_login(request):
+    name = request.session.get("user_name")
+    if name is None:
+        response = JsonResponse({"ret": False})
+    else:
+        response = JsonResponse({"ret": True})
     return response

@@ -1,5 +1,6 @@
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+
 
 # Create your views here.
 def test(request):
@@ -13,5 +14,10 @@ def test(request):
 
 
 def default(request):
+    if request.method == "POST":
+        pwd = request.POST.get("pwd")
+        if pwd == "0603":
+            request.session['permission'] = 'True'
+            return redirect("/vote/")
     responce = render(request, 'default.html')
     return responce

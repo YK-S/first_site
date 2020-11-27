@@ -20,8 +20,8 @@ from . import views
 urlpatterns = [
     path('',views.vote),
     path('login/',views.login),
-    path('check_login/',views.check_login),
     path('logout/',views.logout),
+    path('check_login/',views.check_login),
     path('make_vote/',views.make_vote),
     path('max_page/',views.max_page),
     path('get_table/',views.get_table),

@@ -1,6 +1,9 @@
 from django.db import models
 
 # Create your models here.
+
+
+
 class User(models.Model):
     user_name = models.CharField(max_length=32, primary_key=True, blank=False)
     user_pwd = models.CharField(max_length=32, blank=False)
