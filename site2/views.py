@@ -21,6 +21,6 @@ def default(request):
             request.session['permission'] = 'True'
             return redirect("/vote/")
         else:
-            error = "ERROR"
+            error = "密码错误"
     responce = render(request, 'default.html', context={"error": error})
     return responce
